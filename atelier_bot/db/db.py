@@ -1,5 +1,6 @@
-import aiosqlite
 from typing import List, Optional
+
+import aiosqlite
 
 DB_PATH = "/shared/atelier.db"
 

@@ -1,5 +1,6 @@
-from aiogram import Bot
 import os
+
+from aiogram import Bot
 
 ATELIER_ID = 144227441
 

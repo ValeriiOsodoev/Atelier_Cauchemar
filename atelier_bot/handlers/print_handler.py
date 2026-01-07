@@ -1,33 +1,27 @@
 import logging
-
-from aiogram import Router, F
-from aiogram.filters import CommandStart, Command
-from aiogram.types import Message, CallbackQuery
-from aiogram.fsm.context import FSMContext
 from datetime import datetime
 
+from aiogram import F, Router
+from aiogram.filters import Command, CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, Message
+
 # tariff limits not used in this bot but kept for reference
-from atelier_bot.db.db import (
-    create_or_update_user,
-    get_user,
-    get_artworks_for_user,
-    get_papers_for_user,
-    get_paper_by_id,
-    decrement_paper,
-    create_order,
-    create_artwork,
-    add_paper_for_user,
-)
+from atelier_bot.db.db import (add_paper_for_user, create_artwork,
+                               create_or_update_user, create_order,
+                               decrement_paper)
+from atelier_bot.db.db import get_artworks_for_user
 from atelier_bot.db.db import get_artworks_for_user as db_get_artworks
+from atelier_bot.db.db import get_paper_by_id
+from atelier_bot.db.db import get_papers_for_user
 from atelier_bot.db.db import get_papers_for_user as db_get_papers
-from atelier_bot.keyboards.print_keyboards import (
-    main_menu_keyboard,
-    artworks_keyboard,
-    papers_keyboard,
-    confirm_keyboard,
-)
-from atelier_bot.states.order_states import OrderStates
+from atelier_bot.db.db import get_user
+from atelier_bot.keyboards.print_keyboards import (artworks_keyboard,
+                                                   confirm_keyboard,
+                                                   main_menu_keyboard,
+                                                   papers_keyboard)
 from atelier_bot.services.notify import notify_atelier
+from atelier_bot.states.order_states import OrderStates
 
 router = Router()
 
