@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+atelier_bot/atelier.db
+data/
+shared/
+*.log
