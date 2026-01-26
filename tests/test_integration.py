@@ -24,7 +24,7 @@ class TestNotificationService:
 
             mock_get_artwork.return_value = None  # No artwork icon
 
-            await notify_atelier(123, "testuser", "Test Art", "A4", 5)
+            await notify_atelier(123, "testuser", "Test Art", "A4", 5, 1)
 
             mock_bot_class.assert_called_once_with(token='test_token')
             mock_bot_instance.send_message.assert_called_once()
@@ -34,7 +34,7 @@ class TestNotificationService:
         """Test notification with no BOT_TOKEN."""
         with patch.dict(os.environ, {}, clear=True):
             # Should not raise exception and should return early
-            await notify_atelier(123, "testuser", "Test Art", "A4", 5)
+            await notify_atelier(123, "testuser", "Test Art", "A4", 5, 1)
 
     @pytest.mark.asyncio
     async def test_notify_atelier_with_image(self):
@@ -62,7 +62,7 @@ class TestNotificationService:
                 'image_icon': f'data:image/jpeg;base64,{img_b64}'
             }
 
-            await notify_atelier(123, "testuser", "Test Art", "A4", 5)
+            await notify_atelier(123, "testuser", "Test Art", "A4", 5, 1)
 
             mock_bot_instance.send_photo.assert_called_once()
 

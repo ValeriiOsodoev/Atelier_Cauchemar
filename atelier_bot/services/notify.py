@@ -10,7 +10,8 @@ ATELIER_ID = 144227441
 
 
 async def notify_atelier(
-    user_id: int, username: str, art_name: str, paper_name: str, copies: int
+    user_id: int, username: str, art_name: str, paper_name: str,
+    copies: int, sheets: int
 ) -> None:
     token = os.getenv("BOT_TOKEN")
     if not token:
@@ -34,7 +35,8 @@ async def notify_atelier(
         f"👤 Художник: @{username}\n"
         f"🎨 Работа: {art_name}\n"
         f"📄 Бумага: {paper_name}\n"
-        f"🔢 Количество: {copies}"
+        f"🔢 Копий: {copies}\n"
+        f"📊 Листов: {sheets}"
     )
 
     if icon_data:

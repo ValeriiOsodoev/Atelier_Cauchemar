@@ -5,6 +5,7 @@ class OrderStates(StatesGroup):
     choosing_artwork = State()
     choosing_paper = State()
     entering_copies = State()
+    entering_sheets = State()
     confirming = State()
     adding_artwork = State()
     adding_paper = State()

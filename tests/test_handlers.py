@@ -70,7 +70,7 @@ class TestNotificationService:
         # Test with missing BOT_TOKEN (should return early)
         with patch.dict(os.environ, {}, clear=True):
             # Should not raise exception
-            await notify_atelier(123, "testuser", "art", "paper", 5)
+            await notify_atelier(123, "testuser", "art", "paper", 5, 1)
 
 
 class TestDatabaseIntegration:

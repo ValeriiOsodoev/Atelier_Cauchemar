@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS orders (
     artwork_name TEXT NOT NULL,
     paper_name TEXT NOT NULL,
     copies INTEGER NOT NULL,
+    sheets INTEGER NOT NULL,
     status TEXT NOT NULL,
     created_at TEXT NOT NULL
 );
@@ -213,6 +214,7 @@ async def create_order(
     artwork_name: str,
     paper_name: str,
     copies: int,
+    sheets: int,
     status: str,
     created_at: str,
     db_path: str = DB_PATH,
@@ -220,8 +222,9 @@ async def create_order(
     async with aiosqlite.connect(db_path) as db:
         cur = await db.execute(
             "INSERT INTO orders (user_id, artwork_name, paper_name, copies,"
-            " status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-            (user_id, artwork_name, paper_name, copies, status, created_at),
+            " sheets, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (user_id, artwork_name, paper_name, copies, sheets, status,
+             created_at),
         )
         await db.commit()
         return cur.lastrowid

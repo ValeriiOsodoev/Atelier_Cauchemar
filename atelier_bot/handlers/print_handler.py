@@ -284,26 +284,47 @@ async def enter_copies(message: Message, state: FSMContext):
         await message.answer("Пожалуйста, введите корректное число")
         return
     copies = int(text)
-    data = await state.get_data()
-    paper = data.get("chosen_paper")
     if copies <= 0:
         await message.answer("Количество должно быть больше нуля")
         return
-    if copies > paper["quantity"]:
+    await state.update_data(copies=copies)
+    await state.set_state(OrderStates.entering_sheets)
+    await message.answer(
+        "Введите количество листов бумаги для печати (число):"
+    )
+
+
+@router.message(OrderStates.entering_sheets)
+async def enter_sheets(message: Message, state: FSMContext):
+    if not message.text:
+        await message.answer("Пожалуйста, введите количество листов")
+        return
+    text = message.text.strip()
+    if not text.isdigit():
+        await message.answer("Пожалуйста, введите корректное число")
+        return
+    sheets = int(text)
+    data = await state.get_data()
+    paper = data.get("chosen_paper")
+    if sheets <= 0:
+        await message.answer("Количество должно быть больше нуля")
+        return
+    if sheets > paper["quantity"]:
         await message.answer(
             f"Недостаточно бумаги. Доступно: {paper['quantity']}"
         )
         return
-    await state.update_data(copies=copies)
+    await state.update_data(sheets=sheets)
     await state.set_state(OrderStates.confirming)
 
     art = data.get("chosen_art")
+    copies = data.get("copies")
     confirm_text = (
         f"Подтвердите заказ:\n\n"
         f"Работа: {art['artwork_name']}\n"
         f"Бумага: {paper['paper_name']}\n"
-        f"Копии: {copies}\n"
-        f"Списание бумаги: {copies}"
+        f"Копий: {copies}\n"
+        f"Листов бумаги: {sheets}"
     )
     kb = confirm_keyboard()
     await message.answer(confirm_text, reply_markup=kb)
@@ -316,14 +337,16 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
     art = data.get("chosen_art")
     paper = data.get("chosen_paper")
     copies = data.get("copies")
+    sheets = data.get("sheets")
     # perform DB updates
-    await decrement_paper(paper["id"], copies)
+    await decrement_paper(paper["id"], sheets)
     now = datetime.utcnow().isoformat()
     await create_order(
         user_id=user_id,
         artwork_name=art["artwork_name"],
         paper_name=paper["paper_name"],
         copies=copies,
+        sheets=sheets,
         status="new",
         created_at=now,
     )
@@ -334,6 +357,7 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
         art_name=art["artwork_name"],
         paper_name=paper["paper_name"],
         copies=copies,
+        sheets=sheets,
     )
     await callback.message.answer("Заказ принят и отправлен в ателье 🖨️")
     await state.clear()
