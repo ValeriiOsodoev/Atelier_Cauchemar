@@ -148,6 +148,18 @@ async def decrement_paper(
         await db.commit()
 
 
+async def update_paper_quantity(
+    paper_id: int, new_quantity: int, db_path: str = DB_PATH
+) -> None:
+    """Update paper quantity to a specific value."""
+    async with aiosqlite.connect(db_path) as db:
+        await db.execute(
+            "UPDATE paper_balance SET quantity = ? WHERE id = ?",
+            (new_quantity, paper_id),
+        )
+        await db.commit()
+
+
 async def add_paper_for_user(
     user_id: int, paper_name: str, quantity: int, db_path: str = DB_PATH
 ) -> None:

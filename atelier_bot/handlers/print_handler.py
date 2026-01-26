@@ -15,7 +15,7 @@ from atelier_bot.db.db import get_artworks_for_user as db_get_artworks
 from atelier_bot.db.db import get_paper_by_id
 from atelier_bot.db.db import get_papers_for_user
 from atelier_bot.db.db import get_papers_for_user as db_get_papers
-from atelier_bot.db.db import get_user, search_users
+from atelier_bot.db.db import get_user, search_users, update_paper_quantity
 from atelier_bot.keyboards.print_keyboards import (artworks_keyboard,
                                                    confirm_keyboard,
                                                    main_menu_keyboard,
@@ -660,6 +660,61 @@ async def add_paper(message: Message, state: FSMContext):
     except Exception as e:
         logger.error("Error adding paper: %s", e)
         await message.answer("Ошибка при добавлении бумаги")
+
+
+@router.message(Command("setpaper"))
+async def set_paper(message: Message, state: FSMContext):
+    """Set paper quantity for a user (atelier only)."""
+    if message.from_user.id != ATELIER_ID:
+        await message.answer("Эта команда только для ателье")
+        return
+
+    parts = message.text.split()
+    if len(parts) != 4:
+        await message.answer(
+            "Формат: /setpaper <user_id> <paper_name> <quantity>\n"
+            "Пример: /setpaper 123456789 Бумага_А4 50\n"
+            "Устанавливает остаток бумаги в указанное значение"
+        )
+        return
+
+    try:
+        user_id = int(parts[1])
+        paper_name = parts[2]
+        quantity = int(parts[3])
+        if quantity < 0:
+            raise ValueError
+    except ValueError:
+        await message.answer(
+            "Некорректные параметры. user_id и quantity должны быть "
+            "числами >= 0")
+        return
+
+    try:
+        # Get user's papers to find the specific paper
+        user_papers = await get_papers_for_user(user_id)
+        paper_record = None
+        for paper in user_papers:
+            if paper["paper_name"] == paper_name:
+                paper_record = paper
+                break
+
+        if not paper_record:
+            await message.answer(
+                f"У пользователя ID {user_id} нет бумаги '{paper_name}'.\n"
+                "Сначала добавьте бумагу командой /addpaper"
+            )
+            return
+
+        # Update paper quantity
+        await update_paper_quantity(paper_record["id"], quantity)
+        await message.answer(
+            f"Остаток '{paper_name}' для пользователя ID {user_id} "
+            f"установлен в {quantity} листов"
+        )
+    except Exception as e:
+        logger.error("Error setting paper quantity: %s", e)
+        await message.answer("Ошибка при установке остатка бумаги")
 
 
 @router.message(Command("ping"))
