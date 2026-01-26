@@ -1,9 +1,7 @@
 import pytest
 import os
-import tempfile
 from unittest.mock import AsyncMock, MagicMock, patch
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message, CallbackQuery
 
 # Test the actual handler functions that exist
 from atelier_bot.handlers.print_handler import router
@@ -18,7 +16,8 @@ class TestRouterSetup:
 
     def test_router_has_handlers(self):
         """Test that router has some handlers registered."""
-        # In aiogram 3.x, we can check if handlers are registered by checking the router object
+        # In aiogram 3.x, we can check if handlers are registered by checking
+        # the router object
         # This is a basic check that router is functional
         assert router is not None
         assert hasattr(router, 'message')
@@ -39,9 +38,14 @@ class TestMessageHandlers:
         mock_message.answer = AsyncMock()
         mock_state = AsyncMock(spec=FSMContext)
 
-        with patch('atelier_bot.handlers.print_handler.create_or_update_user') as mock_create_user, \
-             patch('atelier_bot.handlers.print_handler.main_menu_keyboard') as mock_menu_kb, \
-             patch('atelier_bot.handlers.print_handler.main_reply_keyboard') as mock_reply_kb:
+        with (
+            patch('atelier_bot.handlers.print_handler.create_or_update_user')
+            as mock_create_user,
+            patch('atelier_bot.handlers.print_handler.main_menu_keyboard')
+            as mock_menu_kb,
+            patch('atelier_bot.handlers.print_handler.main_reply_keyboard')
+            as mock_reply_kb
+        ):
 
             mock_menu_kb.return_value = None
             mock_reply_kb.return_value = None

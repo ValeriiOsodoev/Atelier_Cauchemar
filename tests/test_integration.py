@@ -1,8 +1,6 @@
 import pytest
-import asyncio
-import tempfile
 import os
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 from atelier_bot.services.notify import notify_atelier
 
@@ -13,11 +11,13 @@ class TestNotificationService:
     @pytest.mark.asyncio
     async def test_notify_atelier_success(self):
         """Test successful atelier notification."""
-        mock_bot = AsyncMock()
 
-        with patch('atelier_bot.services.notify.Bot') as mock_bot_class, \
-             patch('atelier_bot.services.notify.get_artwork_by_name_and_user') as mock_get_artwork, \
-             patch.dict(os.environ, {'BOT_TOKEN': 'test_token'}):
+        with (
+            patch('atelier_bot.services.notify.Bot') as mock_bot_class,
+            patch('atelier_bot.services.notify.get_artwork_by_name_and_user')
+            as mock_get_artwork,
+            patch.dict(os.environ, {'BOT_TOKEN': 'test_token'})
+        ):
 
             mock_bot_instance = AsyncMock()
             mock_bot_class.return_value = mock_bot_instance
@@ -39,11 +39,13 @@ class TestNotificationService:
     @pytest.mark.asyncio
     async def test_notify_atelier_with_image(self):
         """Test notification with artwork image."""
-        mock_bot = AsyncMock()
 
-        with patch('atelier_bot.services.notify.Bot') as mock_bot_class, \
-             patch('atelier_bot.services.notify.get_artwork_by_name_and_user') as mock_get_artwork, \
-             patch.dict(os.environ, {'BOT_TOKEN': 'test_token'}):
+        with (
+            patch('atelier_bot.services.notify.Bot') as mock_bot_class,
+            patch('atelier_bot.services.notify.get_artwork_by_name_and_user')
+            as mock_get_artwork,
+            patch.dict(os.environ, {'BOT_TOKEN': 'test_token'})
+        ):
 
             mock_bot_instance = AsyncMock()
             mock_bot_class.return_value = mock_bot_instance
@@ -56,7 +58,9 @@ class TestNotificationService:
             buffer = BytesIO()
             img.save(buffer, format='JPEG')
             img_b64 = base64.b64encode(buffer.getvalue()).decode()
-            mock_get_artwork.return_value = {'image_icon': f'data:image/jpeg;base64,{img_b64}'}
+            mock_get_artwork.return_value = {
+                'image_icon': f'data:image/jpeg;base64,{img_b64}'
+            }
 
             await notify_atelier(123, "testuser", "Test Art", "A4", 5)
 

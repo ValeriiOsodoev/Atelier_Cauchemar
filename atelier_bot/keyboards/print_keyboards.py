@@ -1,6 +1,11 @@
 from typing import List
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
+)
 
 
 def main_menu_keyboard(is_atelier: bool) -> InlineKeyboardMarkup:
@@ -11,8 +16,10 @@ def main_menu_keyboard(is_atelier: bool) -> InlineKeyboardMarkup:
         )
     else:
         kb.inline_keyboard.append([
-            InlineKeyboardButton(text="➕ Добавить работу", callback_data="add_art"),
-            InlineKeyboardButton(text="➕ Добавить бумагу", callback_data="add_paper")
+            InlineKeyboardButton(
+                text="➕ Добавить работу", callback_data="add_art"),
+            InlineKeyboardButton(
+                text="➕ Добавить бумагу", callback_data="add_paper")
         ])
     return kb
 
@@ -25,7 +32,7 @@ def main_reply_keyboard(is_atelier: bool) -> ReplyKeyboardMarkup:
         one_time_keyboard=False,
         persistent=True
     )
-    
+
     if not is_atelier:
         # Keyboard for artists
         kb.keyboard.append([
@@ -37,7 +44,7 @@ def main_reply_keyboard(is_atelier: bool) -> ReplyKeyboardMarkup:
             KeyboardButton(text="➕ Добавить работу"),
             KeyboardButton(text="➕ Добавить бумагу")
         ])
-    
+
     return kb
 
 

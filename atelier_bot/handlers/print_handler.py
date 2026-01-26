@@ -4,7 +4,7 @@ from datetime import datetime
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import CallbackQuery, Message
 
 # tariff limits not used in this bot but kept for reference
 from atelier_bot.db.db import (add_paper_for_user, create_artwork,
@@ -64,7 +64,7 @@ async def handle_print_text(message: Message, state: FSMContext):
     if user_id == ATELIER_ID:
         await message.answer("Эта функция только для художников")
         return
-    
+
     user = await get_user(user_id)
     if not user:
         await message.answer("Вы не зарегистрированы. Попробуйте /start")
@@ -96,7 +96,7 @@ async def handle_add_art_text(message: Message, state: FSMContext):
     if message.from_user.id != ATELIER_ID:
         await message.answer("Эта функция только для ателье")
         return
-    
+
     await state.set_state(OrderStates.atelier_adding_artwork_user_id)
     await state.update_data(action="add_art")
     await message.answer(
@@ -113,7 +113,7 @@ async def handle_add_paper_text(message: Message, state: FSMContext):
     if message.from_user.id != ATELIER_ID:
         await message.answer("Эта функция только для ателье")
         return
-    
+
     await state.set_state(OrderStates.atelier_adding_paper_user_id)
     await state.update_data(action="add_paper")
     await message.answer(
@@ -160,7 +160,7 @@ async def handle_add_paper(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id != ATELIER_ID:
         await callback.answer("Эта функция только для ателье")
         return
-    
+
     await state.set_state(OrderStates.atelier_adding_paper_user_id)
     await state.update_data(action="add_paper")
     await callback.message.answer(
@@ -176,7 +176,7 @@ async def handle_add_art(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id != ATELIER_ID:
         await callback.answer("Эта функция только для ателье")
         return
-    
+
     await state.set_state(OrderStates.atelier_adding_artwork_user_id)
     await state.update_data(action="add_art")
     await callback.message.answer(
@@ -198,21 +198,21 @@ async def choose_artwork(callback: CallbackQuery, state: FSMContext):
     if not art:
         await callback.answer("Работа не найдена или устарела")
         return
-    
-    print(f"DEBUG: Found artwork {art['artwork_name']}, has icon: {bool(art.get('image_icon'))}")
-    
+
+    print(f"DEBUG: Found artwork {art['artwork_name']}, "
+          f"has icon: {bool(art.get('image_icon'))}")
+
     # Show artwork icon if available
     if art.get("image_icon"):
         import base64
-        from io import BytesIO
         from aiogram.types import BufferedInputFile
-        
+
         try:
             # Remove data URL prefix if present
             icon_b64 = art["image_icon"]
             if icon_b64.startswith("data:image"):
                 icon_b64 = icon_b64.split(",", 1)[1]
-            
+
             icon_data = base64.b64decode(icon_b64)
             icon_file = BufferedInputFile(icon_data, filename="icon.jpg")
             print(f"DEBUG: Sending photo with {len(icon_data)} bytes")
@@ -224,11 +224,12 @@ async def choose_artwork(callback: CallbackQuery, state: FSMContext):
         except Exception as e:
             print(f"DEBUG: Error sending artwork icon: {e}")
             logger.error("Error sending artwork icon: %s", e)
-            await callback.message.answer(f"Выбрана работа: {art['artwork_name']} (иконка недоступна)")
+            await callback.message.answer(
+                f"Выбрана работа: {art['artwork_name']} (иконка недоступна)")
     else:
         print("DEBUG: No icon, sending text only")
         await callback.message.answer(f"Выбрана работа: {art['artwork_name']}")
-    
+
     await state.update_data(chosen_art=art)
     await state.set_state(OrderStates.choosing_paper)
     kb = papers_keyboard(data.get("papers", []))
@@ -347,11 +348,11 @@ async def atelier_enter_artwork_user(message: Message, state: FSMContext):
         await message.answer("Пожалуйста, введите username или user_id")
         return
     text = message.text.strip()
-    
+
     # Remove @ from the beginning if present
     if text.startswith('@'):
         text = text[1:]
-    
+
     # Direct input - try to find user by username or user_id
     users = await search_users(text)
     if not users:
@@ -364,11 +365,13 @@ async def atelier_enter_artwork_user(message: Message, state: FSMContext):
         user_id = users[0]['user_id']
     else:
         await message.answer(
-            f"Найдено несколько пользователей по запросу '{message.text.strip()}'.\n"
-            "Пожалуйста, введите более точный username или используйте user_id."
+            f"Найдено несколько пользователей по запросу "
+            f"'{message.text.strip()}'.\n"
+            "Пожалуйста, введите более точный username или "
+            "используйте user_id."
         )
         return
-    
+
     await state.update_data(atelier_artwork_user_id=user_id)
     await state.set_state(OrderStates.atelier_adding_artwork_name)
     await message.answer("Введите название работы:")
@@ -376,16 +379,17 @@ async def atelier_enter_artwork_user(message: Message, state: FSMContext):
 
 @router.message(OrderStates.atelier_adding_paper_user_id)
 async def atelier_enter_paper_user(message: Message, state: FSMContext):
-    print(f"DEBUG: Received message in atelier_adding_paper_user_id: {message.text}")
+    print(f"DEBUG: Received message in atelier_adding_paper_user_id: "
+          f"{message.text}")
     if not message.text:
         await message.answer("Пожалуйста, введите username или user_id")
         return
     text = message.text.strip()
-    
+
     # Remove @ from the beginning if present
     if text.startswith('@'):
         text = text[1:]
-    
+
     # Direct input - try to find user by username or user_id
     users = await search_users(text)
     if not users:
@@ -398,11 +402,13 @@ async def atelier_enter_paper_user(message: Message, state: FSMContext):
         user_id = users[0]['user_id']
     else:
         await message.answer(
-            f"Найдено несколько пользователей по запросу '{message.text.strip()}'.\n"
-            "Пожалуйста, введите более точный username или используйте user_id."
+            f"Найдено несколько пользователей по запросу "
+            f"'{message.text.strip()}'.\n"
+            "Пожалуйста, введите более точный username или "
+            "используйте user_id."
         )
         return
-    
+
     await state.update_data(atelier_paper_user_id=user_id)
     await state.set_state(OrderStates.atelier_adding_paper_name)
     await message.answer("Введите название бумаги:")
@@ -415,9 +421,10 @@ async def atelier_enter_paper_name(message: Message, state: FSMContext):
         return
     paper_name = message.text.strip()
     if not paper_name:
-        await message.answer("Название бумаги не может быть пустым. Попробуйте снова:")
+        await message.answer(
+            "Название бумаги не может быть пустым. Попробуйте снова:")
         return
-    
+
     await state.update_data(atelier_paper_name=paper_name)
     await state.set_state(OrderStates.atelier_adding_paper_quantity)
     await message.answer("Введите количество бумаги (число):")
@@ -430,9 +437,10 @@ async def atelier_enter_artwork_name(message: Message, state: FSMContext):
         return
     artwork_name = message.text.strip()
     if not artwork_name:
-        await message.answer("Название работы не может быть пустым. Попробуйте снова:")
+        await message.answer(
+            "Название работы не может быть пустым. Попробуйте снова:")
         return
-    
+
     await state.update_data(atelier_artwork_name=artwork_name)
     await state.set_state(OrderStates.atelier_adding_artwork_image)
     await message.answer(
@@ -445,35 +453,39 @@ async def atelier_enter_artwork_name(message: Message, state: FSMContext):
 async def atelier_receive_artwork_image(message: Message, state: FSMContext):
     """Handle artwork image upload and create icon."""
     from atelier_bot.db.db import create_artwork_icon
-    
+
     # Get the largest photo size
     photo = message.photo[-1]
-    
+
     # Download the photo
     photo_file = await message.bot.download(photo.file_id)
     photo_data = photo_file.read()
-    
+
     # Create icon
     icon_base64 = create_artwork_icon(photo_data)
-    
+
     if icon_base64:
         await message.answer("✅ Иконка создана! Добавляю работу...")
     else:
-        await message.answer("⚠️ Не удалось создать иконку, но работа будет добавлена без иконки.")
+        await message.answer(
+            "⚠️ Не удалось создать иконку, но работа будет "
+            "добавлена без иконки.")
         icon_base64 = None
-    
+
     # Get data and create artwork
     data = await state.get_data()
     user_id = data.get("atelier_artwork_user_id")
     artwork_name = data.get("atelier_artwork_name")
-    
+
     try:
         await create_artwork(user_id, artwork_name, icon_base64)
-        await message.answer(f"✅ Работа '{artwork_name}' добавлена для пользователя ID: {user_id}")
+        await message.answer(
+            f"✅ Работа '{artwork_name}' добавлена для пользователя "
+            f"ID: {user_id}")
     except Exception as e:
         logger.error("Error adding artwork: %s", e)
         await message.answer("❌ Ошибка при добавлении работы")
-    
+
     await state.clear()
 
 
@@ -484,14 +496,16 @@ async def atelier_skip_artwork_image(message: Message, state: FSMContext):
     data = await state.get_data()
     user_id = data.get("atelier_artwork_user_id")
     artwork_name = data.get("atelier_artwork_name")
-    
+
     try:
         await create_artwork(user_id, artwork_name)
-        await message.answer(f"✅ Работа '{artwork_name}' добавлена для пользователя ID: {user_id} (без иконки)")
+        await message.answer(
+            f"✅ Работа '{artwork_name}' добавлена для пользователя "
+            f"ID: {user_id} (без иконки)")
     except Exception as e:
         logger.error("Error adding artwork: %s", e)
         await message.answer("❌ Ошибка при добавлении работы")
-    
+
     await state.clear()
 
 
@@ -506,21 +520,24 @@ async def atelier_enter_paper_quantity(message: Message, state: FSMContext):
         if quantity <= 0:
             raise ValueError
     except ValueError:
-        await message.answer("Количество должно быть положительным числом. Попробуйте снова:")
+        await message.answer(
+            "Количество должно быть положительным числом. Попробуйте снова:")
         return
-    
+
     # Get data and add paper
     data = await state.get_data()
     user_id = data.get("atelier_paper_user_id")
     paper_name = data.get("atelier_paper_name")
-    
+
     try:
         await add_paper_for_user(user_id, paper_name, quantity)
-        await message.answer(f"✅ Добавлено {quantity} '{paper_name}' для пользователя ID: {user_id}")
+        await message.answer(
+            f"Добавлено {quantity} '{paper_name}' для пользователя "
+            f"ID: {user_id}")
     except Exception as e:
         logger.error("Error adding paper: %s", e)
         await message.answer("❌ Ошибка при добавлении бумаги")
-    
+
     await state.clear()
 
 
@@ -530,11 +547,11 @@ async def add_art(message: Message, state: FSMContext):
     if message.from_user.id != ATELIER_ID:
         await message.answer("Эта команда только для ателье")
         return
-    
+
     if not message.text:
         await message.answer("Пожалуйста, введите команду корректно")
         return
-    
+
     parts = message.text.split(maxsplit=2)
     if len(parts) != 3:
         await message.answer(
@@ -542,19 +559,21 @@ async def add_art(message: Message, state: FSMContext):
             "Пример: /addart 123456789 Моя_работа"
         )
         return
-    
+
     try:
         user_id = int(parts[1])
         artwork_name = parts[2].strip()
     except ValueError:
-        await message.answer("Некорректный user_id. Должен быть числом.")
+        await message.answer(
+            "Некорректный user_id. Должен быть числом.")
         return
-    
+
     try:
         # Create user if doesn't exist
         await create_or_update_user(user_id, f"user_{user_id}")
         await create_artwork(user_id, artwork_name)
-        await message.answer(f"Работа '{artwork_name}' добавлена для пользователя ID: {user_id}")
+        await message.answer(f"Работа '{artwork_name}' добавлена для "
+                             f"пользователя ID: {user_id}")
     except Exception as e:
         logger.error("Error adding artwork: %s", e)
         await message.answer("Ошибка при добавлении работы")
@@ -566,7 +585,7 @@ async def add_paper(message: Message, state: FSMContext):
     if message.from_user.id != ATELIER_ID:
         await message.answer("Эта команда только для ателье")
         return
-    
+
     parts = message.text.split()
     if len(parts) != 4:
         await message.answer(
@@ -574,7 +593,7 @@ async def add_paper(message: Message, state: FSMContext):
             "Пример: /addpaper 123456789 Бумага_А4 100"
         )
         return
-    
+
     try:
         user_id = int(parts[1])
         paper_name = parts[2]
@@ -582,14 +601,18 @@ async def add_paper(message: Message, state: FSMContext):
         if quantity <= 0:
             raise ValueError
     except ValueError:
-        await message.answer("Некорректные параметры. user_id и quantity должны быть числами > 0")
+        await message.answer(
+            "Некорректные параметры. user_id и quantity должны быть "
+            "числами > 0")
         return
-    
+
     try:
         # Create user if doesn't exist
         await create_or_update_user(user_id, f"user_{user_id}")
         await add_paper_for_user(user_id, paper_name, quantity)
-        await message.answer(f"Добавлено {quantity} '{paper_name}' для пользователя ID: {user_id}")
+        await message.answer(
+            f"Добавлено {quantity} '{paper_name}' для пользователя "
+            f"ID: {user_id}")
     except Exception as e:
         logger.error("Error adding paper: %s", e)
         await message.answer("Ошибка при добавлении бумаги")
@@ -633,7 +656,3 @@ async def cmd_cancel(message: Message, state: FSMContext):
 
 
 # Inline query handler for user search
-
-
-
-

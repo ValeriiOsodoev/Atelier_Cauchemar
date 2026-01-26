@@ -1,6 +1,5 @@
 import os
 import base64
-from io import BytesIO
 
 from aiogram import Bot
 from aiogram.types import BufferedInputFile
@@ -17,7 +16,7 @@ async def notify_atelier(
     if not token:
         return
     bot = Bot(token=token)
-    
+
     # Get artwork icon
     artwork = await get_artwork_by_name_and_user(user_id, art_name)
     icon_data = None
@@ -29,7 +28,7 @@ async def notify_atelier(
             icon_data = base64.b64decode(icon_b64)
         except Exception:
             pass
-    
+
     text = (
         "🖨 Новый заказ на печать\n\n"
         f"👤 Художник: @{username}\n"
@@ -37,11 +36,11 @@ async def notify_atelier(
         f"📄 Бумага: {paper_name}\n"
         f"🔢 Количество: {copies}"
     )
-    
+
     if icon_data:
         icon_file = BufferedInputFile(icon_data, filename="artwork_icon.jpg")
         await bot.send_photo(ATELIER_ID, photo=icon_file, caption=text)
     else:
         await bot.send_message(ATELIER_ID, text)
-    
+
     await bot.session.close()

@@ -1,8 +1,4 @@
 import pytest
-import asyncio
-import os
-import tempfile
-from unittest.mock import AsyncMock, MagicMock
 import base64
 from io import BytesIO
 from PIL import Image
@@ -10,7 +6,6 @@ from PIL import Image
 # Test database functions
 from atelier_bot.db.db import (
     create_artwork_icon,
-    init_db,
     create_or_update_user,
     search_users,
     get_artworks_for_user,

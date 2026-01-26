@@ -1,8 +1,8 @@
+import base64
+from io import BytesIO
 from typing import List, Optional
 
 import aiosqlite
-import base64
-from io import BytesIO
 from PIL import Image
 
 DB_PATH = "atelier.db"
@@ -13,23 +13,23 @@ def create_artwork_icon(image_data: bytes, size: tuple = (100, 100)) -> str:
     try:
         # Open image from bytes
         image = Image.open(BytesIO(image_data))
-        
+
         # Convert to RGB if necessary
         if image.mode != 'RGB':
             image = image.convert('RGB')
-        
+
         # Create thumbnail
         image.thumbnail(size, Image.Resampling.LANCZOS)
-        
+
         # Save to bytes buffer
         buffer = BytesIO()
         image.save(buffer, format='JPEG', quality=85)
         buffer.seek(0)
-        
+
         # Convert to base64
         icon_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
         return f"data:image/jpeg;base64,{icon_base64}"
-    
+
     except Exception as e:
         print(f"Error creating icon: {e}")
         return None
@@ -164,7 +164,8 @@ async def get_artworks_for_user(
     async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
-            "SELECT id, artwork_name, image_icon FROM artworks WHERE user_id = ?",
+            "SELECT id, artwork_name, image_icon FROM artworks "
+            "WHERE user_id = ?",
             (user_id,),
         )
         rows = await cur.fetchall()
@@ -173,23 +174,30 @@ async def get_artworks_for_user(
 
 
 async def create_artwork(
-    user_id: int, artwork_name: str, image_icon: Optional[str] = None, db_path: str = DB_PATH
+    user_id: int,
+    artwork_name: str,
+    image_icon: Optional[str] = None,
+    db_path: str = DB_PATH
 ) -> None:
     async with aiosqlite.connect(db_path) as db:
         await db.execute(
-            "INSERT INTO artworks (user_id, artwork_name, image_icon) VALUES (?, ?, ?)",
+            "INSERT INTO artworks (user_id, artwork_name, image_icon) "
+            "VALUES (?, ?, ?)",
             (user_id, artwork_name, image_icon),
         )
         await db.commit()
 
 
 async def get_artwork_by_name_and_user(
-    user_id: int, artwork_name: str, db_path: str = DB_PATH
+    user_id: int,
+    artwork_name: str,
+    db_path: str = DB_PATH
 ) -> Optional[dict]:
     async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
         cur = await db.execute(
-            "SELECT id, artwork_name, image_icon FROM artworks WHERE user_id = ? AND artwork_name = ?",
+            "SELECT id, artwork_name, image_icon FROM artworks "
+            "WHERE user_id = ? AND artwork_name = ?",
             (user_id, artwork_name),
         )
         row = await cur.fetchone()
@@ -232,7 +240,7 @@ async def search_users(query: str, db_path: str = DB_PATH) -> List[dict]:
     """Search users by username or user_id."""
     async with aiosqlite.connect(db_path) as db:
         db.row_factory = aiosqlite.Row
-        
+
         # Try to find by user_id first
         try:
             user_id = int(query)
@@ -245,10 +253,11 @@ async def search_users(query: str, db_path: str = DB_PATH) -> List[dict]:
                 return [dict(row)]
         except ValueError:
             pass
-        
+
         # Search by username (partial match)
         cur = await db.execute(
-            "SELECT user_id, username FROM users WHERE username LIKE ? ORDER BY username LIMIT 10",
+            "SELECT user_id, username FROM users WHERE username LIKE ? "
+            "ORDER BY username LIMIT 10",
             (f"%{query}%",)
         )
         rows = await cur.fetchall()

@@ -77,10 +77,10 @@ def run_health_check():
 
     # Check imports
     try:
-        import atelier_bot.main
-        import atelier_bot.handlers.print_handler
-        import atelier_bot.services.notify
-        import atelier_bot.keyboards.print_keyboards
+        import atelier_bot.main  # noqa: F401
+        import atelier_bot.handlers.print_handler  # noqa: F401
+        import atelier_bot.services.notify  # noqa: F401
+        import atelier_bot.keyboards.print_keyboards  # noqa: F401
         print("✅ All imports: OK")
     except ImportError as e:
         print(f"❌ Import error: {e}")
