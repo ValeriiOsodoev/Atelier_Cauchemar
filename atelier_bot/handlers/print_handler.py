@@ -7,27 +7,20 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
-from atelier_bot.db.db import (
-    add_paper_for_user,
-    create_artwork,
-    create_or_update_user,
-    create_order,
-    decrement_paper,
-    get_artworks_for_user,
-    get_artworks_for_user as db_get_artworks,
-    get_paper_by_id,
-    get_papers_for_user,
-    get_papers_for_user as db_get_papers,
-    get_user,
-    search_users,
-)
-from atelier_bot.keyboards.print_keyboards import (
-    artworks_keyboard,
-    confirm_keyboard,
-    main_menu_keyboard,
-    main_reply_keyboard,
-    papers_keyboard,
-)
+from atelier_bot.db.db import (add_paper_for_user, create_artwork,
+                               create_or_update_user, create_order,
+                               decrement_paper)
+from atelier_bot.db.db import get_artworks_for_user
+from atelier_bot.db.db import get_artworks_for_user as db_get_artworks
+from atelier_bot.db.db import get_paper_by_id
+from atelier_bot.db.db import get_papers_for_user
+from atelier_bot.db.db import get_papers_for_user as db_get_papers
+from atelier_bot.db.db import get_user, search_users
+from atelier_bot.keyboards.print_keyboards import (artworks_keyboard,
+                                                   confirm_keyboard,
+                                                   main_menu_keyboard,
+                                                   main_reply_keyboard,
+                                                   papers_keyboard)
 from atelier_bot.services.notify import notify_atelier
 from atelier_bot.states.order_states import OrderStates
 

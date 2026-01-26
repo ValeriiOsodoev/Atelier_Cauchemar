@@ -1,11 +1,7 @@
 from typing import List
 
-from aiogram.types import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    KeyboardButton,
-    ReplyKeyboardMarkup,
-)
+from aiogram.types import (InlineKeyboardButton, InlineKeyboardMarkup,
+                           KeyboardButton, ReplyKeyboardMarkup)
 
 
 def main_menu_keyboard(is_atelier: bool) -> InlineKeyboardMarkup:
