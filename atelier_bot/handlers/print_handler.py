@@ -354,11 +354,22 @@ async def atelier_enter_artwork_user(message: Message, state: FSMContext):
     # Direct input - try to find user by username or user_id
     users = await search_users(text)
     if not users:
-        await message.answer(
-            f"Пользователь '{message.text.strip()}' не найден.\n"
-            "Проверьте правильность username или user_id и попробуйте снова."
-        )
-        return
+        # If input looks like user_id (numeric), try to create user
+        try:
+            user_id = int(text)
+            # Create user with default username
+            await create_or_update_user(user_id, f"user_{user_id}")
+            await message.answer(
+                f"Пользователь с ID {user_id} не найден в базе, "
+                f"но будет создан автоматически."
+            )
+        except ValueError:
+            await message.answer(
+                f"Пользователь '{message.text.strip()}' не найден.\n"
+                "Проверьте правильность username или user_id и "
+                "попробуйте снова."
+            )
+            return
     elif len(users) == 1:
         user_id = users[0]['user_id']
     else:
@@ -391,11 +402,22 @@ async def atelier_enter_paper_user(message: Message, state: FSMContext):
     # Direct input - try to find user by username or user_id
     users = await search_users(text)
     if not users:
-        await message.answer(
-            f"Пользователь '{message.text.strip()}' не найден.\n"
-            "Проверьте правильность username или user_id и попробуйте снова."
-        )
-        return
+        # If input looks like user_id (numeric), try to create user
+        try:
+            user_id = int(text)
+            # Create user with default username
+            await create_or_update_user(user_id, f"user_{user_id}")
+            await message.answer(
+                f"Пользователь с ID {user_id} не найден в базе, "
+                f"но будет создан автоматически."
+            )
+        except ValueError:
+            await message.answer(
+                f"Пользователь '{message.text.strip()}' не найден.\n"
+                "Проверьте правильность username или user_id и "
+                "попробуйте снова."
+            )
+            return
     elif len(users) == 1:
         user_id = users[0]['user_id']
     else:

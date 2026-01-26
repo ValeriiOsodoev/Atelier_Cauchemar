@@ -1,0 +1,13 @@
+atelier.db
+.pytest_cache/
+htmlcov/
+__pycache__/
+*.pyc
+.coverage
+tests/
+check_db.py
+run_tests.py
+README.md
+.github/
+.git/
+.gitignore

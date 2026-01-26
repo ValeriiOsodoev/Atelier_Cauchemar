@@ -92,6 +92,47 @@ class TestIntegrationFlows:
         assert callable(get_artworks_for_user)
         assert callable(create_order)
 
+    @pytest.mark.asyncio
+    async def test_user_auto_creation_workflow(self):
+        """Test that atelier workflow can auto-create users by user_id."""
+        from atelier_bot.db.db import search_users, create_or_update_user, init_db
+        import tempfile
+        import os
+
+        # Create a temporary database for testing
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.db') as tmp:
+            test_db_path = tmp.name
+
+        try:
+            # Initialize the database
+            await init_db(test_db_path)
+
+            # Test user_id that doesn't exist
+            test_user_id = 999999
+
+            # Initially, user should not be found
+            users = await search_users(str(test_user_id), test_db_path)
+            assert len(users) == 0
+
+            # Simulate the logic from atelier_enter_artwork_user
+            text = str(test_user_id)
+            users = await search_users(text, test_db_path)
+            if not users:
+                # Should create user automatically
+                user_id = int(text)
+                await create_or_update_user(user_id, f"user_{user_id}", test_db_path)
+
+            # Now user should exist
+            users = await search_users(str(test_user_id), test_db_path)
+            assert len(users) == 1
+            assert users[0]['user_id'] == test_user_id
+            assert users[0]['username'] == f"user_{test_user_id}"
+
+        finally:
+            # Clean up
+            if os.path.exists(test_db_path):
+                os.unlink(test_db_path)
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
