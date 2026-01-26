@@ -6,7 +6,8 @@ from aiogram.types import BufferedInputFile
 
 from atelier_bot.db.db import get_artwork_by_name_and_user
 
-ATELIER_ID = 144227441
+# Get atelier ID from environment variable, fallback to default
+ATELIER_ID = int(os.getenv("ATELIER_ID", "144227441"))
 
 
 async def notify_atelier(

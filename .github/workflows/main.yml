@@ -56,6 +56,7 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/atelier_cauchemar:latest
             docker run -d --name atelier_cauchemar --restart always \
               -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} \
+              -e ATELIER_ID=${{ secrets.ATELIER_ID }} \
               -v data:/shared \
               ${{ secrets.DOCKER_USERNAME }}/atelier_cauchemar:latest
 
