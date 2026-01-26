@@ -1,11 +1,13 @@
 import base64
+import os
 from io import BytesIO
 from typing import List, Optional
 
 import aiosqlite
 from PIL import Image
 
-DB_PATH = "atelier.db"
+# Use persistent storage in Docker, local file for development
+DB_PATH = "/shared/atelier.db" if os.path.exists("/shared") else "atelier.db"
 
 
 def create_artwork_icon(image_data: bytes, size: tuple = (100, 100)) -> str:

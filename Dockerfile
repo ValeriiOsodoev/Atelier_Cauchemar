@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Ensure data directory exists (shared volume)
-RUN mkdir -p /shared
+RUN mkdir -p /shared && chmod 777 /shared
 VOLUME /shared
 
 # Run the bot
