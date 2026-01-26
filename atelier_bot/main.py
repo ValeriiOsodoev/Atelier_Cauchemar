@@ -10,7 +10,8 @@ Run with: python -m atelier_bot.main
 import logging
 
 from aiogram import Bot, Dispatcher
-from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.client.default import DefaultBotProperties
+from aiogram.enums import ParseMode
 
 from atelier_bot.db.db import init_db
 from atelier_bot.handlers.print_handler import router as print_router
@@ -29,8 +30,8 @@ async def main() -> None:
 
     await init_db()
 
-    bot = Bot(token=token)
-    dp = Dispatcher(storage=MemoryStorage())
+    bot = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp = Dispatcher()
     dp.include_router(print_router)
 
     try:
