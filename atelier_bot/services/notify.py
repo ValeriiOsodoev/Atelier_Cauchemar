@@ -1,5 +1,5 @@
-import os
 import base64
+import os
 
 from aiogram import Bot
 from aiogram.types import BufferedInputFile

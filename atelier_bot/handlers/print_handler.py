@@ -1,26 +1,33 @@
+import base64
 import logging
 from datetime import datetime
 
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
-# tariff limits not used in this bot but kept for reference
-from atelier_bot.db.db import (add_paper_for_user, create_artwork,
-                               create_or_update_user, create_order,
-                               decrement_paper, search_users)
-from atelier_bot.db.db import get_artworks_for_user
-from atelier_bot.db.db import get_artworks_for_user as db_get_artworks
-from atelier_bot.db.db import get_paper_by_id
-from atelier_bot.db.db import get_papers_for_user
-from atelier_bot.db.db import get_papers_for_user as db_get_papers
-from atelier_bot.db.db import get_user
-from atelier_bot.keyboards.print_keyboards import (artworks_keyboard,
-                                                   confirm_keyboard,
-                                                   main_menu_keyboard,
-                                                   main_reply_keyboard,
-                                                   papers_keyboard)
+from atelier_bot.db.db import (
+    add_paper_for_user,
+    create_artwork,
+    create_or_update_user,
+    create_order,
+    decrement_paper,
+    get_artworks_for_user,
+    get_artworks_for_user as db_get_artworks,
+    get_paper_by_id,
+    get_papers_for_user,
+    get_papers_for_user as db_get_papers,
+    get_user,
+    search_users,
+)
+from atelier_bot.keyboards.print_keyboards import (
+    artworks_keyboard,
+    confirm_keyboard,
+    main_menu_keyboard,
+    main_reply_keyboard,
+    papers_keyboard,
+)
 from atelier_bot.services.notify import notify_atelier
 from atelier_bot.states.order_states import OrderStates
 
@@ -204,8 +211,6 @@ async def choose_artwork(callback: CallbackQuery, state: FSMContext):
 
     # Show artwork icon if available
     if art.get("image_icon"):
-        import base64
-        from aiogram.types import BufferedInputFile
 
         try:
             # Remove data URL prefix if present
