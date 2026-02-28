@@ -4,9 +4,9 @@ Test runner script for Atelier Cauchemar bot.
 Runs all test suites and generates reports.
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 
@@ -63,8 +63,9 @@ def run_health_check():
 
     # Check if database can be initialized
     try:
-        from atelier_bot.db.db import init_db
         import asyncio
+
+        from atelier_bot.db.db import init_db
 
         async def check_db():
             await init_db()
@@ -77,10 +78,10 @@ def run_health_check():
 
     # Check imports
     try:
-        import atelier_bot.main  # noqa: F401
         import atelier_bot.handlers.print_handler  # noqa: F401
-        import atelier_bot.services.notify  # noqa: F401
         import atelier_bot.keyboards.print_keyboards  # noqa: F401
+        import atelier_bot.main  # noqa: F401
+        import atelier_bot.services.notify  # noqa: F401
         print("✅ All imports: OK")
     except ImportError as e:
         print(f"❌ Import error: {e}")
