@@ -2,7 +2,7 @@ import base64
 import os
 
 from aiogram import Bot
-from aiogram.types import BufferedInputFile
+from aiogram.types import BufferedInputFile, InlineKeyboardButton, InlineKeyboardMarkup
 
 from atelier_bot.db.db import get_artwork_by_name_and_user
 
@@ -12,7 +12,7 @@ ATELIER_ID = int(os.getenv("ATELIER_ID", "144227441"))
 
 async def notify_atelier(
     user_id: int, username: str, art_name: str, paper_name: str,
-    copies: int, sheets: int
+    copies: int, sheets: int, order_id: int
 ) -> None:
     token = os.getenv("BOT_TOKEN")
     if not token:
@@ -37,13 +37,22 @@ async def notify_atelier(
         f"🎨 Работа: {art_name}\n"
         f"📄 Бумага: {paper_name}\n"
         f"🔢 Копий: {copies}\n"
-        f"📊 Листов: {sheets}"
+        f"📊 Листов: {sheets}\n\n"
+        "Подтвердите заказ для списания бумаги:"
     )
+    
+    # Добавляем кнопку подтверждения
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(
+            text="✅ Подтвердить заказ",
+            callback_data=f"atelier_confirm_{order_id}"
+        )]
+    ])
 
     if icon_data:
         icon_file = BufferedInputFile(icon_data, filename="artwork_icon.jpg")
-        await bot.send_photo(ATELIER_ID, photo=icon_file, caption=text)
+        await bot.send_photo(ATELIER_ID, photo=icon_file, caption=text, reply_markup=keyboard)
     else:
-        await bot.send_message(ATELIER_ID, text)
+        await bot.send_message(ATELIER_ID, text, reply_markup=keyboard)
 
     await bot.session.close()
