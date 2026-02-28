@@ -172,6 +172,21 @@ async def add_paper_for_user(
         await db.commit()
 
 
+async def get_paper_by_user_and_name(
+    user_id: int, paper_name: str, db_path: str = DB_PATH
+) -> Optional[dict]:
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT id, paper_name, quantity, user_id FROM paper_balance"
+            " WHERE user_id = ? AND paper_name = ?",
+            (user_id, paper_name),
+        )
+        row = await cur.fetchone()
+        await cur.close()
+        return dict(row) if row else None
+
+
 # Artworks
 async def get_artworks_for_user(
     user_id: int, db_path: str = DB_PATH
@@ -240,6 +255,32 @@ async def create_order(
         )
         await db.commit()
         return cur.lastrowid
+
+
+async def get_order_by_id(
+    order_id: int, db_path: str = DB_PATH
+) -> Optional[dict]:
+    async with aiosqlite.connect(db_path) as db:
+        db.row_factory = aiosqlite.Row
+        cur = await db.execute(
+            "SELECT id, user_id, artwork_name, paper_name, copies, sheets,"
+            " status, created_at FROM orders WHERE id = ?",
+            (order_id,),
+        )
+        row = await cur.fetchone()
+        await cur.close()
+        return dict(row) if row else None
+
+
+async def update_order_status(
+    order_id: int, status: str, db_path: str = DB_PATH
+) -> None:
+    async with aiosqlite.connect(db_path) as db:
+        await db.execute(
+            "UPDATE orders SET status = ? WHERE id = ?",
+            (status, order_id),
+        )
+        await db.commit()
 
 
 async def get_all_users(db_path: str = DB_PATH) -> List[dict]:
