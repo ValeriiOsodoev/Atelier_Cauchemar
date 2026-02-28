@@ -2,7 +2,8 @@ import base64
 import os
 
 from aiogram import Bot
-from aiogram.types import BufferedInputFile, InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import (BufferedInputFile, InlineKeyboardButton,
+                           InlineKeyboardMarkup)
 
 from atelier_bot.db.db import get_artwork_by_name_and_user
 
@@ -40,7 +41,7 @@ async def notify_atelier(
         f"📊 Листов: {sheets}\n\n"
         "Подтвердите заказ для списания бумаги:"
     )
-    
+
     # Добавляем кнопку подтверждения
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(
@@ -50,8 +51,13 @@ async def notify_atelier(
     ])
 
     if icon_data:
-        icon_file = BufferedInputFile(icon_data, filename="artwork_icon.jpg")
-        await bot.send_photo(ATELIER_ID, photo=icon_file, caption=text, reply_markup=keyboard)
+        icon_file = BufferedInputFile(
+            icon_data, filename="artwork_icon.jpg"
+        )
+        await bot.send_photo(
+            ATELIER_ID, photo=icon_file, caption=text,
+            reply_markup=keyboard
+        )
     else:
         await bot.send_message(ATELIER_ID, text, reply_markup=keyboard)
 

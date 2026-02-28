@@ -8,22 +8,31 @@ from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
 
-from atelier_bot.db.db import (add_paper_for_user, create_artwork,
-                               create_or_update_user, create_order,
-                               decrement_paper, get_order_by_id,
-                               get_paper_by_user_and_name,
-                               update_order_status)
-from atelier_bot.db.db import get_artworks_for_user
+from atelier_bot.db.db import (
+    add_paper_for_user,
+    create_artwork,
+    create_or_update_user,
+    create_order,
+    decrement_paper,
+    get_artworks_for_user,
+    get_order_by_id,
+    get_paper_by_id,
+    get_paper_by_user_and_name,
+    get_papers_for_user,
+    get_user,
+    search_users,
+    update_order_status,
+    update_paper_quantity,
+)
 from atelier_bot.db.db import get_artworks_for_user as db_get_artworks
-from atelier_bot.db.db import get_paper_by_id
-from atelier_bot.db.db import get_papers_for_user
 from atelier_bot.db.db import get_papers_for_user as db_get_papers
-from atelier_bot.db.db import get_user, search_users, update_paper_quantity
-from atelier_bot.keyboards.print_keyboards import (artworks_keyboard,
-                                                   confirm_keyboard,
-                                                   main_menu_keyboard,
-                                                   main_reply_keyboard,
-                                                   papers_keyboard)
+from atelier_bot.keyboards.print_keyboards import (
+    artworks_keyboard,
+    confirm_keyboard,
+    main_menu_keyboard,
+    main_reply_keyboard,
+    papers_keyboard,
+)
 from atelier_bot.services.notify import notify_atelier
 from atelier_bot.states.order_states import OrderStates
 
@@ -341,7 +350,7 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
     paper = data.get("chosen_paper")
     copies = data.get("copies")
     sheets = data.get("sheets")
-    
+
     # Создаем заказ со статусом ожидания подтверждения
     # НЕ списываем бумагу - это будет сделано после подтверждения ателье
     now = datetime.utcnow().isoformat()
@@ -354,10 +363,10 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
         status="pending_confirmation",
         created_at=now,
     )
-    
+
     # Сохраняем paper_id в заказе для последующего списания
     await state.update_data(paper_id=paper["id"])
-    
+
     # Уведомляем ателье с кнопкой подтверждения
     await notify_atelier(
         user_id=user_id,
@@ -368,7 +377,7 @@ async def confirm_order(callback: CallbackQuery, state: FSMContext):
         sheets=sheets,
         order_id=order_id,
     )
-    
+
     await callback.message.answer(
         "Заказ отправлен в ателье и ожидает подтверждения 🖨️\n"
         "Вы получите уведомление после подтверждения."
@@ -381,58 +390,62 @@ async def atelier_confirm_order(callback: CallbackQuery):
     """Обработчик подтверждения заказа со стороны ателье."""
     # Проверяем что это ателье
     if callback.from_user.id != ATELIER_ID:
-        await callback.answer("У вас нет прав для подтверждения заказов", show_alert=True)
+        await callback.answer(
+            "У вас нет прав для подтверждения заказов",
+            show_alert=True
+        )
         return
-    
+
     # Получаем order_id из callback_data
     try:
         order_id = int(callback.data.split("_")[2])
     except (IndexError, ValueError):
         await callback.answer("Ошибка в данных заказа", show_alert=True)
         return
-    
+
     # Получаем заказ из БД
     order = await get_order_by_id(order_id)
     if not order:
         await callback.answer("Заказ не найден", show_alert=True)
         return
-    
+
     # Проверяем статус заказа
     if order["status"] != "pending_confirmation":
         await callback.answer(
-            f"Заказ уже обработан (статус: {order['status']})", 
+            f"Заказ уже обработан (статус: {order['status']})",
             show_alert=True
         )
         return
-    
+
     # Получаем запись бумаги для списания
     paper = await get_paper_by_user_and_name(
-        order["user_id"], 
+        order["user_id"],
         order["paper_name"]
     )
-    
+
     if not paper:
         await callback.answer(
-            "Ошибка: бумага не найдена у пользователя", 
+            "Ошибка: бумага не найдена у пользователя",
             show_alert=True
         )
         return
-    
-    # Проверяем достаточно ли бумаги (используем sheets если есть, иначе copies)
+
+    # Проверяем достаточно ли бумаги
     sheets_needed = order.get("sheets") or order["copies"]
     if paper["quantity"] < sheets_needed:
         await callback.answer(
-            f"Недостаточно бумаги! Доступно: {paper['quantity']}, требуется: {sheets_needed}", 
+            f"Недостаточно бумаги! Доступно: {paper['quantity']}, "
+            f"требуется: {sheets_needed}",
             show_alert=True
         )
         return
-    
+
     # Списываем бумагу
     await decrement_paper(paper["id"], sheets_needed)
-    
+
     # Обновляем статус заказа
     await update_order_status(order_id, "confirmed")
-    
+
     # Уведомляем художника о подтверждении
     token = os.getenv("BOT_TOKEN")
     if token:
@@ -446,16 +459,18 @@ async def atelier_confirm_order(callback: CallbackQuery):
         if order.get('sheets'):
             notification_text += f"📊 Листов списано: {order['sheets']}\n"
         notification_text += "\nБумага списана с вашего баланса."
-        
+
         try:
             await bot.send_message(order["user_id"], notification_text)
         except Exception as e:
             logger.error(f"Failed to notify user {order['user_id']}: {e}")
         finally:
             await bot.session.close()
-    
+
     # Отвечаем ателье
-    await callback.answer("Заказ подтвержден! Бумага списана.", show_alert=True)
+    await callback.answer(
+        "Заказ подтвержден! Бумага списана.", show_alert=True
+    )
     await callback.message.edit_text(
         callback.message.text + "\n\n✅ ЗАКАЗ ПОДТВЕРЖДЕН"
     )
