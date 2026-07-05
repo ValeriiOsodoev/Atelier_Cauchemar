@@ -69,4 +69,4 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_NOTIFY_TO }}
           token: ${{ secrets.BOT_TOKEN }}
-          message: "Atelier Cauchemar deployed"
+          message: "Atelier Cauchemarr deployed"
